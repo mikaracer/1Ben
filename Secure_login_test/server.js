@@ -42,7 +42,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-app.use(cookieParser('keyboard cat'))
+app.use(cookieParser(process.env.SESSION_SECRET))
 
 app.get('/', checkAuthenticated, (req, res) => {
     res.render('index.ejs', { name: req.user.name })
