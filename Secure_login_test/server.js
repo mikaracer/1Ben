@@ -30,14 +30,13 @@ initializePassport(
 )
 
 a = 10
-
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
+app.use(flash())
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }
+    saveUninitialized: false
 }))
 app.use(passport.initialize())
 app.use(passport.session())
@@ -66,7 +65,6 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
         if (users.findOne({ email: req.body.email })) {
             console.log('email already in use!')
-
             res.redirect('/register')
             return
         }
@@ -85,7 +83,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
 })
 
 app.delete('/logout', (req, res, next) => {
-    req.logout(function (err) {
+    req.logOut(function (err) {
         if (err) { return next(err); }
         res.redirect('/login');
     })
@@ -95,7 +93,6 @@ function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next()
     }
-
     res.redirect('/login')
 }
 
