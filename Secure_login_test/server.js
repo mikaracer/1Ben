@@ -14,6 +14,7 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const connectFlash = require('connect-flash')
 const cookieParser = require('cookie-parser')
+const jwtDecode = require('jwt-decode')
 
 Mongoose
     .connect(process.env.DATABASE_LOCAL, {
@@ -25,11 +26,12 @@ Mongoose
 const initializePassport = require('./passport-config')
 initializePassport(
     passport,
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id)
+    email => users.find(user => users.email === email),
+    id => users.find(user => users.user_uuid === id)
 )
 
 a = 10
+
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
@@ -44,7 +46,7 @@ app.use(methodOverride('_method'))
 app.use(cookieParser(process.env.SESSION_SECRET))
 
 app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', { name: req.user.name })
+    res.render('index.ejs', { name: '?' })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -63,7 +65,7 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
-        if (users.findOne({ email: req.body.email })) {
+        if (await users.findOne({ email: req.body.email })) {
             console.log('email already in use!')
             res.redirect('/register')
             return
